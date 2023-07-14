@@ -13,7 +13,7 @@ function App() {
   const [network, setNetwork] = useState();
   const [tokenBalances, setTokenBalances] = useState({});
   const [rpcUrl, setRpcUrl] = useState("");
-  const [nativeTokenAddress, setNativeTokenAddress] = useState("");
+  const [nativeTokenSymbol, setNativeTokenSymbol] = useState("");
   // const [provider, setProvider] = useState<any>();
   const [chainTokens, setChainTokens] = useState([]);
   const [tokensWithBalance, SetTokensWithBalance] = useState([]);
@@ -59,7 +59,8 @@ function App() {
       if (allChains?.hasOwnProperty(key)) {
         const chainData = allChains[key];
         if (chainData?.chainID === network) {
-          setChainName(chainData?.chainName)
+          setChainName(chainData?.chainName);
+          setNativeTokenSymbol(chainData?.nativeTokenSymbol);
         }
       }
     }
@@ -96,67 +97,88 @@ function App() {
   }, [tokensWithBalance]);
 
   return (
-    <div className="p-10">
-      {isConnected ? (
-        <h1 className="text-xl text-center mt-3">Wallet is Connected to {`${chainName}`} chain</h1>
-      ) : (
-        <>
-          <button
-            className="border border-gray-700 px-3 py-2 rounded-md w-auto block mx-auto my-0 font-semibold"
-            onClick={connectWallet}
-          >
-            Connect Wallet
-          </button>
+    <div className="py-10 h-screen
+      bg-gradient-to-tr 
+      from-indigo-500 via-purple-500 to-indigo-700
+      animate-background
+    ">
+      <div className="container mx-auto my-0">
+        {isConnected ? (
           <h1 className="text-xl text-center mt-3">
-            Please Connect the Wallet
+            Wallet is Connected to {`${chainName}`} chain
           </h1>
-        </>
-      )}
-      {isConnected && (
-        <>
-          <div className="w-full mt-10">
-            <div className="flex items-center justify-center mt-5">
-              <h3 className="mx-10">
-                Wallet Address: {truncateEthAddress(walletAddress)}
-              </h3>
-              <h3 className="mx-10">Account Balance: {accountBalance}</h3>
-              <h3 className="mx-10">Chain ID / Network: {network}</h3>
+        ) : (
+          <>
+            <button
+              className="border border-gray-700 px-3 py-2 rounded-md w-auto block mx-auto my-0 font-semibold"
+              onClick={connectWallet}
+            >
+              Connect Wallet
+            </button>
+            <h1 className="text-xl text-center mt-3">
+              Please Connect the Wallet
+            </h1>
+          </>
+        )}
+        {isConnected && (
+          <>
+            <div className="w-full mt-10">
+              <div className="flex items-center justify-center mt-5 bg-black p-5 rounded-xl">
+                <h3 className="mx-10 text-white">
+                  <span className="text-lg font-medium font-mono">
+                    Wallet Address:{" "}
+                  </span>
+                  {truncateEthAddress(walletAddress)}
+                </h3>
+                <h3 className="mx-10 text-white">
+                  <span className="text-lg font-medium font-mono">
+                    Account Balance:{" "}
+                  </span>
+                  {accountBalance?.slice(0, 8)} {nativeTokenSymbol}
+                </h3>
+                <h3 className="mx-10 text-white">
+                  <span className="text-lg font-medium font-mono">
+                    Chain ID / Network:{" "}
+                  </span>
+                  {network}
+                </h3>
+              </div>
             </div>
-          </div>
-          <div className="mt-10">
-            <div className="grid grid-cols-6 border border-gray-500">
-              <div className="col-span-2 p-3 font-semibold">Name</div>
-              <div className="col-span-1 p-3 font-semibold">Symbol</div>
-              <div className="col-span-1 p-3 font-semibold">Address</div>
-              <div className="col-span-1 p-3 font-semibold">Decimals</div>
-              <div className="col-span-1 p-3 font-semibold">Balance</div>
+            <div className="mt-10 rounded-lg border border-gray-500">
+              <div className="grid grid-cols-6">
+                <div className="col-span-2 p-3 font-semibold">Name</div>
+                <div className="col-span-1 p-3 font-semibold">Symbol</div>
+                <div className="col-span-1 p-3 font-semibold">Address</div>
+                <div className="col-span-1 p-3 font-semibold">Decimals</div>
+                <div className="col-span-1 p-3 font-semibold">Balance</div>
+              </div>
+              {chainTokens?.map((token: any, idx: number) => {
+                return (
+                  <div
+                    className="grid grid-cols-6 border-t border-gray-500"
+                    key={idx}
+                  >
+                    <div className="flex items-center col-span-2 p-3">
+                      <img
+                        src={token.logoURI}
+                        alt="token"
+                        className="w-10 h-10 p-1 border border-slate-400 rounded-full mr-3"
+                      />
+                      <div>{token?.name}</div>
+                    </div>
+                    <div className="col-span-1 p-3">{token?.symbol}</div>
+                    <div className="col-span-1 p-3">
+                      {truncateEthAddress(token?.address)}
+                    </div>
+                    <div className="col-span-1 p-3">{token?.decimals}</div>
+                    <div className="col-span-1 p-3"></div>
+                  </div>
+                );
+              })}
             </div>
-            {chainTokens?.map((token: any, idx: number) => {
-              return (
-                <div
-                  className="grid grid-cols-6 border border-gray-500"
-                  key={idx}
-                >
-                  <div className="flex items-center col-span-2 p-3">
-                    <img
-                      src={token.logoURI}
-                      alt="token"
-                      className="w-10 h-10 p-1 border border-slate-400 rounded-full mr-3"
-                    />
-                    <div>{token?.name}</div>
-                  </div>
-                  <div className="col-span-1 p-3">{token?.symbol}</div>
-                  <div className="col-span-1 p-3">
-                    {truncateEthAddress(token?.address)}
-                  </div>
-                  <div className="col-span-1 p-3">{token?.decimals}</div>
-                  <div className="col-span-1 p-3"></div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
