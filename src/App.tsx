@@ -17,6 +17,7 @@ function App() {
   // const [provider, setProvider] = useState<any>();
   const [chainTokens, setChainTokens] = useState([]);
   const [tokensWithBalance, SetTokensWithBalance] = useState([]);
+  const [chainName, setChainName] = useState("");
 
   const { ethereum } = window;
   const infuraURL = "https://polygon-bor.publicnode.com";
@@ -53,6 +54,16 @@ function App() {
   };
 
   useEffect(() => {
+    let allChains: any = chains[0];
+    for (const key in allChains) {
+      if (allChains?.hasOwnProperty(key)) {
+        const chainData = allChains[key];
+        if (chainData?.chainID === network) {
+          setChainName(chainData?.chainName)
+        }
+      }
+    }
+
     network &&
       axios
         .get(`http://127.0.0.1:3000/api/v1/tokens/${network}`)
@@ -87,9 +98,7 @@ function App() {
   return (
     <div className="p-10">
       {isConnected ? (
-        <>
-          <h1 className="text-xl text-center mt-3">Wallet is Connected</h1>
-        </>
+        <h1 className="text-xl text-center mt-3">Wallet is Connected to {`${chainName}`} chain</h1>
       ) : (
         <>
           <button
